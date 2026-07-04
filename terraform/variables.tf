@@ -14,7 +14,3 @@ variable "golden_image_id" {
 variable "admin_username" {
   default = "mazenadmin"
 }
-
-variable "admin_password" {
-  description = "VM Admin Password"   #export TF_VAR_admin_password="" in terminal before running terraform apply
-}
