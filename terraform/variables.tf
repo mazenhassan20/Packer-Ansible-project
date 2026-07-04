@@ -14,3 +14,7 @@ variable "golden_image_id" {
 variable "admin_username" {
   default = "mazenadmin"
 }
+variable "ssh_public_key" {
+  description = "The SSH Public Key for the VMs"
+  type        = string
+}
