@@ -32,7 +32,7 @@ jobs:
         ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
         ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
         ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
-        TF_VAR_ssh_public_key: ${{ secrets.SSH_PRIVATE_KEY }}
+        TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }} 
       run: |
         cd terraform
         terraform init
