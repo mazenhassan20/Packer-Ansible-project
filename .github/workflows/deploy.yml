@@ -3,7 +3,7 @@ name: Deploy Infrastructure and App
 on:
   push:
     branches:
-      - main # الـ Pipeline هيشتغل أول ما تعمل push لفرع main
+      - main
 
 jobs:
   deploy:
@@ -39,6 +39,7 @@ jobs:
         terraform apply --auto-approve
 
   
+  
     - name: Run Ansible Playbooks
       env:
         ANSIBLE_HOST_KEY_CHECKING: 'False'
@@ -49,6 +50,10 @@ jobs:
         
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
         chmod 600 private_key.pem
+        
+        echo "⏳ Waiting for VMs to boot and SSH to start..."
+        sleep 45
+        
         
         ansible-playbook -i inventory.ini web.yml --private-key=private_key.pem
         ansible-playbook -i inventory.ini haproxy.yml --private-key=private_key.pem
