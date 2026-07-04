@@ -25,12 +25,14 @@ jobs:
       with:
         terraform_version: 1.5.0
         
+   
     - name: Terraform Init & Apply
-      env: 
+      env:
         ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
         ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
         ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
         ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
+        TF_VAR_ssh_public_key: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
         cd terraform
         terraform init
