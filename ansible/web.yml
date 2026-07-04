@@ -1,0 +1,38 @@
+---
+- name: Configure Private Web Servers
+  hosts: web
+  become: yes
+  tasks:
+    - name: Ensure HAProxy service is completely stopped and disabled
+      systemd:
+        name: haproxy
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Remove HAProxy config entirely
+      file:
+        path: /etc/haproxy/haproxy.cfg
+        state: absent
+
+    - name: Re-create NGINX log directory
+      file:
+        path: /var/log/nginx
+        state: directory
+        owner: www-data
+        group: adm
+        mode: '0755'
+
+    - name: Create a custom index.html
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <h1> Hello from Immutable Infrastructure!</h1>
+          <p>This request was served by <strong>{{ inventory_hostname }}</strong> ({{ ansible_host }})</p>
+          <p>Designed by Mazen Hassan</p>
+
+    - name: Force NGINX to restart and clear its state
+      systemd:
+        name: nginx
+        state: restarted
+        enabled: yes
