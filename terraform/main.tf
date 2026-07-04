@@ -65,7 +65,7 @@ resource "azurerm_linux_virtual_machine" "haproxy_vm" {
 
   admin_ssh_key {
     username   = var.admin_username
-    public_key = file("~/.ssh/id_rsa.pub") 
+    public_key = var.ssh_public_key 
 }
   network_interface_ids           = [azurerm_network_interface.haproxy_nic.id]
   source_image_id                 = var.golden_image_id
@@ -87,7 +87,7 @@ resource "azurerm_linux_virtual_machine" "web_vm" {
 
   admin_ssh_key {
     username   = var.admin_username
-    public_key = file("~/.ssh/id_rsa.pub") 
+    public_key = var.ssh_public_key
 }
   network_interface_ids           = [azurerm_network_interface.web_nic[count.index].id]
   source_image_id                 = var.golden_image_id
