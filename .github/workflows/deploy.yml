@@ -40,20 +40,21 @@ jobs:
 
   
   
+    
     - name: Run Ansible Playbooks
       env:
         ANSIBLE_HOST_KEY_CHECKING: 'False'
       run: |
+      
+        mkdir -p ~/.ssh
+        
+      
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        
+        
         cd ansible
         sudo apt-get update && sudo apt-get install -y sshpass
         
-        
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
-        chmod 600 private_key.pem
-        
-        echo "⏳ Waiting for VMs to boot and SSH to start..."
-        sleep 45
-        
-        
-        ansible-playbook -i inventory.ini web.yml --private-key=private_key.pem
-        ansible-playbook -i inventory.ini haproxy.yml --private-key=private_key.pem
+        ansible-playbook -i inventory.ini web.yml
+        ansible-playbook -i inventory.ini haproxy.yml
