@@ -39,22 +39,16 @@ jobs:
         terraform apply --auto-approve
 
   
-    - name: Setup SSH Agent & Key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        eval $(ssh-agent -s)
-        ssh-add ~/.ssh/id_rsa
-
-    
     - name: Run Ansible Playbooks
+      env:
+        ANSIBLE_HOST_KEY_CHECKING: 'False'
       run: |
         cd ansible
+       
         sudo apt-get update && sudo apt-get install -y sshpass
         
-        # تشغيل البلاي بوك بتاع الويب
-        ansible-playbook -i inventory.ini web.yml
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+        chmod 600 private_key.pem
         
-        # تشغيل البلاي بوك بتاع الـ HAProxy
-        ansible-playbook -i inventory.ini haproxy.yml
+        ansible-playbook -i inventory.ini web.yml --private-key=private_key.pem
+        ansible-playbook -i inventory.ini haproxy.yml --private-key=private_key.pe
