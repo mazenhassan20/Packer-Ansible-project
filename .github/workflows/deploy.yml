@@ -1,0 +1,53 @@
+name: Deploy Infrastructure and App
+
+on:
+  push:
+    branches:
+      - main # الـ Pipeline هيشتغل أول ما تعمل push لفرع main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+   
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+  
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.5.0
+        
+    - name: Terraform Init & Apply
+      run: |
+        cd terraform
+        terraform init
+        terraform apply --auto-approve
+
+  
+    - name: Setup SSH Agent & Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        eval $(ssh-agent -s)
+        ssh-add ~/.ssh/id_rsa
+
+    
+    - name: Run Ansible Playbooks
+      run: |
+        cd ansible
+        sudo apt-get update && sudo apt-get install -y sshpass
+        
+        # تشغيل البلاي بوك بتاع الويب
+        ansible-playbook -i inventory.ini web.yml
+        
+        # تشغيل البلاي بوك بتاع الـ HAProxy
+        ansible-playbook -i inventory.ini haproxy.yml
