@@ -2,20 +2,20 @@
 - name: Configure Private Web Servers
   hosts: web
   become: yes
+
   tasks:
-    - name: Ensure HAProxy service is completely stopped and disabled
+    - name: Disable HAProxy on web servers
       systemd:
         name: haproxy
         state: stopped
         enabled: no
       ignore_errors: yes
 
-    - name: Remove HAProxy config entirely
+    - name: Remove HAProxy config from web servers
       file:
         path: /etc/haproxy/haproxy.cfg
         state: absent
-
-    - name: Re-create NGINX log directory
+    - name: Recreate NGINX log directory
       file:
         path: /var/log/nginx
         state: directory
@@ -23,16 +23,43 @@
         group: adm
         mode: '0755'
 
-    - name: Create a custom index.html
+    - name: Recreate NGINX runtime directory
+      file:
+        path: /var/run/nginx
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Deploy custom index.html
       copy:
         dest: /var/www/html/index.html
         content: |
-          <h1> Hello from Immutable Infrastructure!</h1>
-          <p>This request was served by <strong>{{ inventory_hostname }}</strong> ({{ ansible_host }})</p>
-          <p>Designed by Mazen Hassan</p>
+          <!DOCTYPE html>
+          <html>
+          <head><title>Immutable Infrastructure</title></head>
+          <body>
+            <h1>Hello from Immutable Infrastructure!</h1>
+            <p>Request served by <strong>{{ inventory_hostname }}</strong> ({{ ansible_host }})</p>
+            <p>Designed by Mazen Hassan</p>
+          </body>
+          </html>
+        owner: www-data
+        group: www-data
+        mode: '0644'
 
-    - name: Force NGINX to restart and clear its state
+    - name: Enable and start NGINX
       systemd:
         name: nginx
         state: restarted
         enabled: yes
+        daemon_reload: yes
+
+    - name: Verify NGINX is running
+      command: systemctl is-active nginx
+      register: nginx_status
+      changed_when: false
+
+    - name: Show NGINX status
+      debug:
+        msg: "NGINX on {{ inventory_hostname }}: {{ nginx_status.stdout }}"
