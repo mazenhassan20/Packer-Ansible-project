@@ -2,8 +2,9 @@
 - name: Configure HAProxy Load Balancer
   hosts: lb
   become: yes
+
   tasks:
-    - name: Configure HAProxy
+    - name: Deploy HAProxy configuration
       copy:
         dest: /etc/haproxy/haproxy.cfg
         content: |
@@ -33,12 +34,23 @@
           backend http_back
               mode http
               balance roundrobin
-              option http-server-close 
-              server web1 10.0.1.5:80 check
-              server web2 10.0.1.4:80 check
+              option http-server-close
+              option forwardfor
+              server web1 10.0.1.5:80 check inter 2s rise 2 fall 3
+              server web2 10.0.1.4:80 check inter 2s rise 2 fall 3
 
-    - name: Enable and restart HAProxy
+          listen stats
+              bind *:8080
+              stats enable
+              stats uri /stats
+              stats refresh 10s
+        validate: haproxy -c -f %s
+      notify: restart haproxy
+
+  handlers:
+    - name: restart haproxy
       systemd:
         name: haproxy
+        state: restarted
         enabled: yes
-        state: restarted 
+        daemon_reload: yes
