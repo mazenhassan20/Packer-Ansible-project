@@ -366,3 +366,6 @@ az storage container show --name tfstate --account-name tfstatemazen2026
 - ✅ **Immutable image model** — servers are never patched in place; rebuild the image and reprovision
 - ✅ **HAProxy config validation** — `haproxy -c` validates config before it's applied, preventing a bad config from taking down the LB
 - ✅ **No credentials in code** — SSH public key passed as a variable, never hardcoded in `.tf` files
+---
+ِ**Author** 
+:Mazen Elsayad
